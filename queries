@@ -1,22 +1,15 @@
-# SQL Queries Showcase
-
 ## Data Cleaning and Preparation
 
-```sql
 -- Rename columns for better readability
 ALTER TABLE ushouseholdincome RENAME COLUMN `ALand` TO `Area_Land`;
 ALTER TABLE ushouseholdincome RENAME COLUMN `AWater` TO `Area_Water`;
-```
 
-```sql
 -- Identify duplicate records based on the 'id' column
 SELECT id, COUNT(id) AS count
 FROM ushouseholdincome
 GROUP BY id
 HAVING count > 1;
-```
 
-```sql
 -- Assign row numbers to duplicate records for removal
 SELECT *
 FROM (
@@ -26,9 +19,7 @@ FROM (
 	GROUP BY row_id, id
 ) AS dups
 WHERE row_num > 1;
-```
 
-```sql
 -- Delete duplicate records based on assigned row numbers
 DELETE FROM ushouseholdincome
 WHERE row_id IN (
@@ -40,31 +31,23 @@ WHERE row_id IN (
 	) AS dups
 	WHERE row_num > 1
 );
-```
 
 ## Data Standardization
 
-```sql
 -- Fix a misspelled state name
 UPDATE ushouseholdincome
 SET State_Name = 'Georgia' WHERE State_Name = 'georia';
-```
 
-```sql
 -- Fill in missing 'Place' values based on County data
 UPDATE ushouseholdincome
 SET Place = 'Autaugaville'
 WHERE Place = '' AND County = 'Autauga County';
-```
 
-```sql
 -- Correct lowercase values in the 'Primary' column
 UPDATE ushouseholdincome
 SET `Primary` = 'Place'
 WHERE `Primary` = 'place';
-```
 
-```sql
 -- Standardize 'Type' column values
 UPDATE ushouseholdincome
 SET `Type` = 'Borough'
@@ -73,11 +56,9 @@ WHERE `Type` = 'Boroughs';
 UPDATE ushouseholdincome
 SET `Type` = 'CDP'
 WHERE `Type` = 'CPD';
-```
 
 ## Exploratory Data Analysis
 
-```sql
 -- Calculate average land and water area for each state
 SELECT State_Name,
 ROUND(AVG(Area_Land), 2) AS avg_land,
@@ -85,9 +66,7 @@ ROUND(AVG(Area_Water), 2) AS avg_water
 FROM ushouseholdincome
 WHERE Area_Land <> 0 AND Area_Water <> 0
 GROUP BY State_Name;
-```
 
-```sql
 -- Calculate average land and water area for each county
 SELECT State_Name, County,
 ROUND(AVG(Area_Land), 2) AS avg_land,
@@ -95,9 +74,7 @@ ROUND(AVG(Area_Water), 2) AS avg_water
 FROM ushouseholdincome
 WHERE Area_Land <> 0 AND Area_Water <> 0
 GROUP BY State_Name, County;
-```
 
-```sql
 -- Identify the counties with the largest land area
 SELECT State_Name, County,
 ROUND(AVG(Area_Land), 2) AS avg_land,
@@ -106,28 +83,22 @@ FROM ushouseholdincome
 WHERE Area_Land <> 0 AND Area_Water <> 0
 GROUP BY State_Name, County
 ORDER BY avg_land DESC;
-```
 
 ## Income Analysis
 
-```sql
 -- Join household income data with income statistics
 SELECT *
 FROM ushouseholdincome u
 JOIN ushouseholdincome_statistics us
 ON u.id = us.id;
-```
 
-```sql
 -- Analyze income data by state and county
 SELECT u.State_Name, u.County, Mean, Median
 FROM ushouseholdincome u
 JOIN ushouseholdincome_statistics us
 ON u.id = us.id
 WHERE Mean <> 0;
-```
 
-```sql
 -- Find the counties with the highest median income
 SELECT u.State_Name, u.County,
 ROUND(AVG(Median), 2) AS avg_median
@@ -137,9 +108,7 @@ ON u.id = us.id
 WHERE Mean <> 0
 GROUP BY u.State_Name, u.County
 ORDER BY avg_median DESC;
-```
 
-```sql
 -- Find the top 10 states by median income
 SELECT u.State_Name,
 ROUND(AVG(Median), 2) AS avg_median
@@ -150,5 +119,4 @@ WHERE Mean <> 0
 GROUP BY u.State_Name
 ORDER BY avg_median DESC
 LIMIT 10;
-```
 
